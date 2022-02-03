@@ -1,0 +1,23 @@
+name: test1
+sorters:
+  -
+    name: mountainsort4
+    algorithm: mountainsort4
+    sorting_params:
+      detect_sign: -1,
+      adjacency_radius: 50,
+      freq_min: 300,
+      freq_max: 6000,
+      filter: True,
+      whiten: True,
+      clip_size: 50,
+      detect_threshold: 3,
+      detect_interval: 10
+studies:
+  -
+    study_set_name: PAIRED_KAMPFF
+    study_name: paired_kampff
+    recording_names:
+      - 2014_11_25_Pair_3_0
+    sorters:
+      - mountainsort4
