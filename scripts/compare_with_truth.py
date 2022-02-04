@@ -23,15 +23,14 @@ def _run_compare_with_truth(sorting_npz_uri: str, sorting_true_npz_uri: str) -> 
         ]
         runarepo.run(repo, subpath=subpath, inputs=inputs, output_dir=output_dir, use_docker=False)
 
-        print('Loading comparison output...')
-        with open(f'{output_dir}/comparison.json') as f:
-            comparison = json.load(f)
-        return comparison
+        print('Storing comparison output...')
+        comparison_uri = kc.store_file(f'{output_dir}/comparison.json')
+        return {'comparison_uri': comparison_uri}
 
 @click.command()
 @click.argument('config_name')
 def main(config_name: str):
-    jobs0 = kc.get({'type': 'sfworkflow-jobs', 'name': config_name})
+    jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
     jobs = [job for job in jobs if job.type == 'compare-with-truth']
     jobs_to_run = [

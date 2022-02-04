@@ -28,7 +28,7 @@ def _run_prepare_recording_nwb_job(recording_uri: str) -> dict:
 @click.command()
 @click.argument('config_name')
 def main(config_name: str):
-    jobs0 = kc.get({'type': 'sfworkflow-jobs', 'name': config_name})
+    jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
     jobs = [job for job in jobs if job.type == 'prepare-recording-nwb']
     jobs_to_run = [

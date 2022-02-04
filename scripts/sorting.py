@@ -40,7 +40,7 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
 @click.argument('config_name')
 @click.argument('algorithm')
 def main(config_name: str, algorithm: str):
-    jobs0 = kc.get({'type': 'sfworkflow-jobs', 'name': config_name})
+    jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
     jobs = [job for job in jobs if job.type == 'sorting' and job.kwargs['algorithm'] == algorithm]
     jobs_to_run = [
