@@ -13,6 +13,10 @@ sorters:
       clip_size: 50
       detect_threshold: 3
       detect_interval: 10
+  -
+    name: spykingcircus
+    algorithm: spykingcircus
+    sorting_params: {}
 studies:
   -
     study_set_name: PAIRED_KAMPFF
@@ -21,3 +25,4 @@ studies:
       - 2014_11_25_Pair_3_0
     sorter_names:
       - mountainsort4
+      - spykingcircus

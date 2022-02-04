@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 import click
-import json
-import runarepo
+import yaml
 from typing import List
 import sortingview as sv
 import kachery_client as kc
@@ -24,8 +25,11 @@ def _run_prepare_sorting_true_npz_job(sorting_true_uri: str) -> dict:
         return {'sorting_true_npz_uri': sorting_true_npz_uri}
 
 @click.command()
-@click.argument('config_name')
-def main(config_name: str):
+@click.argument('config_file')
+def main(config_file: str):
+    with open(config_file, 'r') as f:
+        config = yaml.safe_load(f)
+    config_name = config['name']
     jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
     jobs = [job for job in jobs if job.type == 'prepare-sorting-true-npz']
