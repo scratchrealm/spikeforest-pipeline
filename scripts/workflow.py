@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import click
 import yaml
 from typing import List, Union
@@ -61,7 +63,7 @@ def main(config_file: str):
                         'recording_nwb_uri': recording_nwb_uri,
                         'sorting_true_npz_uri': sorting_true_npz_uri,
                         'sorting_npz_uri': sorting_npz_uri,
-                        'comparison_with_truth': kc.load_json(comparison_uri)
+                        'comparison_with_truth_uri': comparison_uri
                     })
     # Set the list of jobs as a kachery mutable
     kc.set({'type': 'spikeforest-workflow-jobs', 'name': config_name}, [job.to_dict() for job in workflow.jobs])

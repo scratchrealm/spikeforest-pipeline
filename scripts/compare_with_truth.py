@@ -33,7 +33,8 @@ def _run_compare_with_truth(sorting_npz_uri: str, sorting_true_npz_uri: str, use
 @click.command()
 @click.argument('config_file')
 @click.option('--docker', is_flag=True, help="Use docker images")
-def main(config_file: str, docker: bool):
+@click.option('--force-run', is_flag=True, help="Force rerurn")
+def main(config_file: str, docker: bool, force_run: bool):
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
@@ -42,7 +43,7 @@ def main(config_file: str, docker: bool):
     jobs = [job for job in jobs if job.type == 'compare-with-truth']
     jobs_to_run = [
         job for job in jobs
-        if job.force_run or (kc.get(job.key()) is None)
+        if force_run or job.force_run or (kc.get(job.key()) is None)
     ]
     print('JOBS TO RUN:')
     for job in jobs_to_run:

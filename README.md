@@ -13,15 +13,15 @@ Compare the accuracy of spike sorting algorithms on electrophysiolical recording
 
 ## Running the workflow
 
-The SpikeForest workflow are split into a collection of scripts. These scripts are meant to be run repeatedly, as the updates from one will influence the others. These services all read and write to the local kachery node via the running daemon.
+The SpikeForest workflow is split into a collection of scripts. These scripts are meant to be run multiple times, as the updates from one will influence the others. These scripts all read and write to the local kachery node via the running daemon.
 
-The main script is `workflow.py`. This assembles a list of jobs and a list of results. This script should be run before the other scripts are run, and then again any time jobs have been newly completed by the other scripts. To run with the test configuration:
+The main script is `workflow.py`. This assembles a list of jobs and a list of results and stores them in kachery. This script should be run before the others, and then again any time jobs have been newly completed by the other scripts. To run with the test configuration supplied in this repo:
 
 ```bash
 scripts/workflow.py test.yaml
 ```
 
-Once the workflow script has completed you can run the prepare scripts
+Once the workflow script has completed you can prepare the input files (stored in kachery)
 
 ```bash
 scripts/prepare_recording_nwb.py test.yaml
