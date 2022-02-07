@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+from textwrap import indent
 import click
+from itsdangerous import json
 import yaml
 import kachery_client as kc
 import figurl
@@ -22,7 +24,7 @@ def main(config_file: str):
         data={'type': 'spikeforest-workflow-results', 'results': results},
         view_url='gs://figurl/spikeforestview-1'
     )
-    url = F.url(label=f'SF Workflow results: {config_name}')
+    url = F.url(label=f'SF workflow results: {config_name}')
     print(url)
 
 if __name__ == '__main__':
