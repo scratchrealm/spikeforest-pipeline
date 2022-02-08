@@ -27,12 +27,14 @@ def main(config_file: str, json_format: str):
             sorting_true_npz_uri = result['sorting_true_npz_uri']
             sorting_npz_uri = result['sorting_npz_uri']
             comparison_with_truth_uri: dict = result['comparison_with_truth_uri']
+            sorting_figurl = result.get('sorting_figurl', None)
             print('==================================================================')
             print(f'RECORDING: {recording["studyName"]}/{recording["name"]}')
             print(f'SORTER: {sorter["name"]}')
             print(f'Recording nwb: {recording_nwb_uri}')
             print(f'Sorting true npz: {sorting_true_npz_uri}')
             print(f'Sorting npz: {sorting_npz_uri}')
+            print(f'Sorting figurl: {sorting_figurl}')
             print('')
             comparison_with_truth = kc.load_json(comparison_with_truth_uri)
             if comparison_with_truth is not None:

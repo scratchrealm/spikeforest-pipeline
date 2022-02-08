@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/print_results.py config.yaml "$@"

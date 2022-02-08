@@ -53,6 +53,8 @@ def main(config_file: str):
             for sorter in config_sorters: # for each sorter
                 # do the spike sorting for the given sorter
                 sorting_npz_uri = _sorting(workflow, recording, recording_nwb_uri, sorter)
+                # sorting figurl
+                sorting_figurl = _get_sorting_figurl(workflow, recording, sorter, recording_nwb_uri, sorting_npz_uri)
                 # compare with truth
                 comparison_uri = _compare_with_truth(workflow, recording, sorter, sorting_npz_uri, sorting_true_npz_uri)
                 if sorting_npz_uri is not None and comparison_uri is not None and kc.load_file(comparison_uri, local_only=True) is not None:
@@ -63,7 +65,8 @@ def main(config_file: str):
                         'recording_nwb_uri': recording_nwb_uri,
                         'sorting_true_npz_uri': sorting_true_npz_uri,
                         'sorting_npz_uri': sorting_npz_uri,
-                        'comparison_with_truth_uri': comparison_uri
+                        'comparison_with_truth_uri': comparison_uri,
+                        'sorting_figurl': sorting_figurl
                     })
     # Set the list of jobs as a kachery mutable
     kc.set({'type': 'spikeforest-workflow-jobs', 'name': config_name}, [job.to_dict() for job in workflow.jobs])
@@ -154,6 +157,26 @@ def _compare_with_truth(workflow: Workflow, recording: dict, sorter: dict, sorti
     comparison_uri = output.get('comparison_uri', None) if output is not None else None
     comparison_uri = comparison_uri if comparison_uri and kc.load_file(comparison_uri, local_only=True) is not None else None
     return comparison_uri
+
+def _get_sorting_figurl(workflow: Workflow, recording: dict, sorter: dict, recording_nwb_uri: Union[str, None], sorting_npz_uri: Union[str, None]):
+    if sorting_npz_uri is None: return None
+    if recording_nwb_uri is None: return None
+    recording_label = f'{recording["studyName"]}/{recording["name"]}'
+    sorter_name = sorter['name']
+    job = Job(
+        type='sorting-figurl',
+        label=f'sorting figurl {sorter_name} {recording_label}',
+        kwargs={
+            'label': f'{sorter_name} {recording_label}',
+            'recording_nwb_uri': recording_nwb_uri,
+            'sorting_npz_uri': sorting_npz_uri
+        },
+        force_run=False
+    )
+    workflow.add_job(job)
+    output = kc.get(job.key())
+    sorting_figurl = output.get('sorting_figurl', None) if output is not None else None
+    return sorting_figurl
 
 def _get_spikeforest_recording(sf_study_sets: dict, study_set_name: str, study_name: str, recording_name: str):
     try:

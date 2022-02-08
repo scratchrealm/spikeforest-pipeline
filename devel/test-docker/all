@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 2/8/22
+# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=691230fa7794d4d246c3d9a6b735de8b9530c0e0&channel=flatiron1&label=SF%20workflow%20results%3A%20test-docker
+
 set -ex
 
 ./workflow
