@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 2/8/22
-# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=e3360c9f167e257af196cf0e34128fdeb1e4c9be&channel=flatiron1&label=SF%20workflow%20results%3A%20flatiron
+# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=1ab9eb7cc5d3ddc2548286a2734f323e22a715c6&channel=flatiron1&label=SF%20workflow%20results%3A%20flatiron
 
 set -ex
 
@@ -19,4 +19,7 @@ set -ex
 ./compare
 ./workflow
 
-./figurl-results
+./sorting-figurl
+./workflow
+
+./results-figurl
