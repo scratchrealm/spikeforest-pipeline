@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 import os
-from textwrap import indent
 import click
-from itsdangerous import json
 import yaml
 import kachery_client as kc
 import figurl

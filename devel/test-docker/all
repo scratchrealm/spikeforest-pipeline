@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -ex
+
+./workflow
+./prepare
+./workflow
+
+./mountainsort4
+
+./spykingcircus
+
+./tridesclous
+
+./workflow
+./compare
+./workflow
+
+./figurl-results

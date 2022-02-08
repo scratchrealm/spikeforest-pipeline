@@ -1,4 +1,4 @@
-name: main
+name: test-docker
 sorters:
   -
     name: mountainsort4
@@ -17,16 +17,20 @@ sorters:
     name: spykingcircus
     algorithm: spykingcircus
     sorting_params: {}
+  -
+    name: tridesclous
+    algorithm: tridesclous
+    sorting_params: {}
 studies:
   -
     study_set_name: PAIRED_KAMPFF
     study_name: paired_kampff
     recording_names:
       - 2014_11_25_Pair_3_0
-      - 2015_09_03_Pair_9_0A
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - tridesclous
   -
     study_set_name: SYNTH_MAGLAND
     study_name: synth_magland_noise10_K10_C4
@@ -36,3 +40,4 @@ studies:
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - tridesclous

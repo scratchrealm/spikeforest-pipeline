@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/sorting.py \
+    config.yaml spykingcircus \
+    --singularity --image docker://docker.flatironinstitute.org/magland/spykingcircus-rar \
+    "$@"

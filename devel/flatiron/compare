@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/compare_with_truth.py \
+    config.yaml \
+    --singularity --image docker://docker.flatironinstitute.org/magland/compare-with-truth-rar \
+    "$@"

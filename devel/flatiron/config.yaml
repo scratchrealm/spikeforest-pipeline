@@ -1,0 +1,43 @@
+name: flatiron
+sorters:
+  -
+    name: mountainsort4
+    algorithm: mountainsort4
+    sorting_params:
+      detect_sign: -1
+      adjacency_radius: 50
+      freq_min: 300
+      freq_max: 6000
+      filter: True
+      whiten: True
+      clip_size: 50
+      detect_threshold: 3
+      detect_interval: 10
+  -
+    name: spykingcircus
+    algorithm: spykingcircus
+    sorting_params: {}
+  -
+    name: tridesclous
+    algorithm: tridesclous
+    sorting_params: {}
+studies:
+  -
+    study_set_name: PAIRED_KAMPFF
+    study_name: paired_kampff
+    recording_names:
+      - 2014_11_25_Pair_3_0
+      - 2015_09_03_Pair_9_0A
+    sorter_names:
+      - mountainsort4
+      - spykingcircus
+      - tridesclous
+  -
+    study_set_name: SYNTH_MAGLAND
+    study_name: synth_magland_noise10_K10_C4
+    recording_names:
+      - 001_synth
+      - 002_synth
+    sorter_names:
+      - mountainsort4
+      - spykingcircus

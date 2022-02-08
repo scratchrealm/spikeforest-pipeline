@@ -36,7 +36,7 @@ def _run_compare_with_truth(sorting_npz_uri: str, sorting_true_npz_uri: str, use
 @click.option('--force-run', is_flag=True, help="Force rerurn")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
-def main(config_file: str, docker: bool, force_run: bool):
+def main(config_file: str, docker: bool, force_run: bool, singularity: bool, image: Union[str, None]):
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']

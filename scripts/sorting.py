@@ -22,6 +22,8 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
             subpath = 'mountainsort4'
         elif algorithm == 'spykingcircus':
             subpath = 'spykingcircus'
+        elif algorithm == 'tridesclous':
+            subpath = 'tridesclous'
         else:
             raise Exception(f'Unexpected algorithm: {algorithm}')
 

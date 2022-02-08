@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+export FIGURL_CHANNEL=flatiron1
+
+$BASEDIR/scripts/figurl_results.py config.yaml
