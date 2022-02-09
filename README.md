@@ -17,10 +17,10 @@ In order to load the spikeforest datasets, you will need to [configure your kach
 
 The SpikeForest workflow is split into a collection of scripts. These scripts are meant to be run multiple times, as the updates from one will influence the others. These scripts all read and write to the local kachery node via the running daemon.
 
-The easiest way to get started is to run the example in [devel/test-docker](devel/test-docker)
+The easiest way to get started is to run the example in [devel/test-docker](devel/test-docker) under this repo base:
 
 ```bash
-cd devel/test-docker
+cd spikeforest-workflow/devel/test-docker
 ```
 
 See the contents of [config.yaml](devel/test-docker/config.yaml) for which recordings and sorters will be used in this workflow.
@@ -40,7 +40,7 @@ Next download and prepare the spikeforest datasets
 You must run the workflow script again to assemble the updated jobs
 
 ```bash
-./prepare
+./workflow
 ```
 
 Now run the spike sorting:
