@@ -62,6 +62,7 @@ Compare with truth:
 Prepare figurl views for the sorting outputs. Note that you will need to set the FIGURL_CHANNEL environment variable to a channel for which you have file upload permissions.
 
 ```bash
+export FIGURL_CHANNEL='YOUR_CHANNEL_NAME_HERE'
 ./sorting-figurl
 ./workflow
 ```
