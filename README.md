@@ -82,3 +82,7 @@ Finally, generate the figurl link to the results of the workflow. Once again, yo
 This will print a URL. For example:
 
 https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=73e428abc3b8ad627fe4faa702318ba67b6f39a3&channel=flatiron1&label=SF%20workflow%20results%3A%20test-docker
+
+## Spike sorting jobs
+
+The code defining the spike sorting jobs is contained in [spikesorting-runarepo](https://github.com/scratchrealm/spikesorting-runarepo).
