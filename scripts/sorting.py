@@ -50,7 +50,7 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
 @click.command()
 @click.argument('config_file')
 @click.argument('algorithm')
-@click.option('--force-run', is_flag=True, help="Force rerurn")
+@click.option('--force-run', is_flag=True, help="Force rerun")
 @click.option('--docker', is_flag=True, help="Use docker image")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
