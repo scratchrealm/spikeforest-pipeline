@@ -9,7 +9,7 @@ Compare the accuracy of spike sorting algorithms on electrophysiolical recording
 * Docker (unless you want to run the spike sorting outside of docker)
 * SortingView (`pip install sortingview`)
 * spikeinterface -- install [Python package from source](https://github.com/spikeinterface/spikeinterface)
-* nwb_conversion_tools -- install [Python package from source](https://github.com/catalystneuro/nwb-conversion-tools)
+* nwb_conversion_tools 0.9.9 (`pip install nwb-conversion-tools==0.9.9`)
 * runarepo (`pip install git+https://github.com/scratchrealm/runarepo`)
 
 In order to load the spikeforest datasets, you will need to [configure your kachery node to be part of the spikeforest channel](https://github.com/flatironinstitute/spikeforest/blob/main/doc/join-spikeforest-download-channel.md).
