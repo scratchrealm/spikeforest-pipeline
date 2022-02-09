@@ -36,12 +36,16 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
             runarepo.Input(name='INPUT_RECORDING_NWB', path=recording_nwb_path),
             runarepo.Input(name='INPUT_SORTING_PARAMS', path=sorting_params_path)
         ]
-        runarepo.run(repo, subpath=subpath, inputs=inputs, output_dir=output_dir, use_docker=use_docker, use_singularity=use_singularity, image=image)
+        output = runarepo.run(repo, subpath=subpath, inputs=inputs, output_dir=output_dir, use_docker=use_docker, use_singularity=use_singularity, image=image)
         print('Storing sorting output...')
         sorting_npz_path = f'{output_dir}/sorting.npz'
         sorting_npz_uri = kc.store_file(sorting_npz_path)
+        console_lines_uri = kc.store_json(output.console_lines)
         
-        return {'sorting_npz_uri': sorting_npz_uri}
+        return {
+            'sorting_npz_uri': sorting_npz_uri,
+            'console_lines_uri': console_lines_uri
+        }
 
 @click.command()
 @click.argument('config_file')

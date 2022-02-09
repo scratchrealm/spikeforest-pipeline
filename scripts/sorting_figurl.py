@@ -9,13 +9,18 @@ from Job import Job
 from spikeinterface import extractors as se
 from spikeinterface.core.old_api_utils import NewToOldSorting
 import sortingview as sv
-from sortingview.SpikeSortingView import SpikeSortingView
+from sortingview.SpikeSortingView import SpikeSortingView, create_console_view
 
-def _run_sorting_figurl(recording_nwb_uri: str, sorting_npz_uri: str, label: str) -> dict:
+def _run_sorting_figurl(recording_nwb_uri: str, sorting_npz_uri: str, label: str, sorting_console_lines_uri: Union[str, None]=None) -> dict:
     recording_nwb = kc.load_file(recording_nwb_uri)
     assert recording_nwb is not None, f'Unable to load file: {recording_nwb_uri}'
     sorting_npz = kc.load_file(sorting_npz_uri)
     assert sorting_npz is not None, f'Unable to load file: {sorting_npz_uri}'
+    if sorting_console_lines_uri is not None:
+        sorting_console_lines = kc.load_json(sorting_console_lines_uri)
+        if sorting_console_lines is None: f'Warning: Unable to load sorting console: {sorting_console_lines_uri}'
+    else:
+        sorting_console_lines = None
     
     recording = sv.LabboxEphysRecordingExtractor({
         'recording_format': 'nwb',
@@ -52,7 +57,14 @@ def _run_sorting_figurl(recording_nwb_uri: str, sorting_npz_uri: str, label: str
     f7 = X.create_electrode_geometry()
     # f8 = X.create_live_cross_correlograms()
 
-    mountain_layout = X.create_mountain_layout(figures=[f1, f2, f3, f4, f5, f6, f7], label=label)
+    figures = [f1, f2, f3, f4, f5, f6, f7]
+    if sorting_console_lines is not None:
+        print('Preparing console view')
+        figures.append(
+            create_console_view(console_lines=sorting_console_lines)
+        )
+
+    mountain_layout = X.create_mountain_layout(figures=figures, label=label)
 
     url = mountain_layout.url()
     return {'sorting_figurl': url}

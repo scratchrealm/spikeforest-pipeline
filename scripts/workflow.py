@@ -52,9 +52,11 @@ def main(config_file: str):
             sorting_true_npz_uri = _prepare_sorting_true_npz(workflow, recording)
             for sorter in config_sorters: # for each sorter
                 # do the spike sorting for the given sorter
-                sorting_npz_uri = _sorting(workflow, recording, recording_nwb_uri, sorter)
+                sorting_out = _sorting(workflow, recording, recording_nwb_uri, sorter)
+                sorting_npz_uri = sorting_out['sorting_npz_uri']
+                sorting_console_lines_uri = sorting_out['console_lines_uri']
                 # sorting figurl
-                sorting_figurl = _get_sorting_figurl(workflow, recording, sorter, recording_nwb_uri, sorting_npz_uri)
+                sorting_figurl = _get_sorting_figurl(workflow, recording, sorter, recording_nwb_uri, sorting_npz_uri, sorting_console_lines_uri)
                 # compare with truth
                 comparison_uri = _compare_with_truth(workflow, recording, sorter, sorting_npz_uri, sorting_true_npz_uri)
                 if sorting_npz_uri is not None and comparison_uri is not None and kc.load_file(comparison_uri, local_only=True) is not None:
@@ -65,6 +67,7 @@ def main(config_file: str):
                         'recording_nwb_uri': recording_nwb_uri,
                         'sorting_true_npz_uri': sorting_true_npz_uri,
                         'sorting_npz_uri': sorting_npz_uri,
+                        'sorting_console_lines_uri': sorting_console_lines_uri,
                         'comparison_with_truth_uri': comparison_uri,
                         'sorting_figurl': sorting_figurl
                     })
@@ -136,7 +139,12 @@ def _sorting(workflow: Workflow, recording: dict, recording_nwb_uri: Union[str, 
     output = kc.get(job.key())
     sorting_npz_uri = output.get('sorting_npz_uri', None) if output is not None else None
     sorting_npz_uri = sorting_npz_uri if sorting_npz_uri and kc.load_file(sorting_npz_uri, local_only=True) is not None else None
-    return sorting_npz_uri
+    console_lines_uri = output.get('console_lines_uri', None) if output is not None else None
+    console_lines_uri = console_lines_uri if console_lines_uri and kc.load_file(console_lines_uri, local_only=True) is not None else None
+    return {
+        'sorting_npz_uri': sorting_npz_uri,
+        'console_lines_uri': console_lines_uri
+    }
 
 def _compare_with_truth(workflow: Workflow, recording: dict, sorter: dict, sorting_npz_uri: Union[str, None], sorting_true_npz_uri: Union[str, None]):
     if sorting_npz_uri is None: return None
@@ -158,7 +166,7 @@ def _compare_with_truth(workflow: Workflow, recording: dict, sorter: dict, sorti
     comparison_uri = comparison_uri if comparison_uri and kc.load_file(comparison_uri, local_only=True) is not None else None
     return comparison_uri
 
-def _get_sorting_figurl(workflow: Workflow, recording: dict, sorter: dict, recording_nwb_uri: Union[str, None], sorting_npz_uri: Union[str, None]):
+def _get_sorting_figurl(workflow: Workflow, recording: dict, sorter: dict, recording_nwb_uri: Union[str, None], sorting_npz_uri: Union[str, None], sorting_console_lines_uri: Union[str, None]):
     if sorting_npz_uri is None: return None
     if recording_nwb_uri is None: return None
     recording_label = f'{recording["studyName"]}/{recording["name"]}'
@@ -169,7 +177,8 @@ def _get_sorting_figurl(workflow: Workflow, recording: dict, sorter: dict, recor
         kwargs={
             'label': f'{sorter_name} {recording_label}',
             'recording_nwb_uri': recording_nwb_uri,
-            'sorting_npz_uri': sorting_npz_uri
+            'sorting_npz_uri': sorting_npz_uri,
+            'sorting_console_lines_uri': sorting_console_lines_uri
         },
         force_run=False
     )

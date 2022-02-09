@@ -26,6 +26,7 @@ def main(config_file: str, json_format: str):
             recording_nwb_uri = result['recording_nwb_uri']
             sorting_true_npz_uri = result['sorting_true_npz_uri']
             sorting_npz_uri = result['sorting_npz_uri']
+            sorting_console_lines_uri = result.get('sorting_console_lines_uri', None)
             comparison_with_truth_uri: dict = result['comparison_with_truth_uri']
             sorting_figurl = result.get('sorting_figurl', None)
             print('==================================================================')
@@ -34,6 +35,7 @@ def main(config_file: str, json_format: str):
             print(f'Recording nwb: {recording_nwb_uri}')
             print(f'Sorting true npz: {sorting_true_npz_uri}')
             print(f'Sorting npz: {sorting_npz_uri}')
+            print(f'Sorting console: {sorting_console_lines_uri}')
             print(f'Sorting figurl: {sorting_figurl}')
             print('')
             comparison_with_truth = kc.load_json(comparison_with_truth_uri)
