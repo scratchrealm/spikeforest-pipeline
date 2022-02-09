@@ -7,42 +7,77 @@ Compare the accuracy of spike sorting algorithms on electrophysiolical recording
 * Python >= 3.8
 * [A running kachery daemon](https://github.com/kacheryhub/kachery-doc/blob/main/doc/hostKacheryNode.md)
 * Docker (unless you want to run the spike sorting outside of docker)
-* SpikeInterface and sortingview (`pip install spikeinterface sortingview`)
-* nwb_conversion_tools (install [Python package from source](https://github.com/catalystneuro/nwb-conversion-tools) for now)
+* SortingView (`pip install sortingview`)
+* spikeinterface -- install [Python package from source](https://github.com/spikeinterface/spikeinterface)
+* nwb_conversion_tools 0.9.9 (`pip install nwb-conversion-tools==0.9.9`)
 * runarepo (`pip install git+https://github.com/scratchrealm/runarepo`)
+
+In order to load the spikeforest datasets, you will need to [configure your kachery node to be part of the spikeforest channel](https://github.com/flatironinstitute/spikeforest/blob/main/doc/join-spikeforest-download-channel.md).
 
 ## Running the workflow
 
 The SpikeForest workflow is split into a collection of scripts. These scripts are meant to be run multiple times, as the updates from one will influence the others. These scripts all read and write to the local kachery node via the running daemon.
 
-The main script is `workflow.py`. This assembles a list of jobs and a list of results and stores them in kachery. This script should be run before the others, and then again any time jobs have been newly completed by the other scripts. To run with the test configuration supplied in this repo:
+The easiest way to get started is to run the example in [devel/test-docker](devel/test-docker) under this repo base:
 
 ```bash
-scripts/workflow.py configs/test.yaml
+cd spikeforest-workflow/devel/test-docker
 ```
 
-Once the workflow script has completed you can prepare the input files (stored in kachery)
+See the contents of [config.yaml](devel/test-docker/config.yaml) for which recordings and sorters will be used in this workflow.
+
+Start by running the workflow script to assemble the list of jobs to be run
 
 ```bash
-scripts/prepare_recording_nwb.py configs/test.yaml
-scripts/prepare_sorting_true_npz.py configs/test.yaml
+./workflow
 ```
 
-Next, run the spike sorters (see [spikesorting-runarepo](https://github.com/scratchrealm/spikesorting-runarepo))
+Next download and prepare the spikeforest datasets
 
 ```bash
-scripts/sorting.py configs/test.yaml mountainsort4 --docker
-scripts/sorting.py configs/test.yaml spykingcircus --docker
+./prepare
 ```
 
-Then the comparison with truth
+You must run the workflow script again to assemble the updated jobs
 
 ```bash
-scripts/compare_with_truth.py configs/test.yaml --docker
+./workflow
 ```
 
-Finally, run the workflow script once again to collect the results
+Now run the spike sorting:
 
 ```bash
-scripts/workflow.py configs/test.yaml
+./mountainsort4
+./spykingcircus
+./workflow
 ```
+
+Compare with truth:
+
+```bash
+./compare
+./workflow
+```
+
+Prepare figurl views for the sorting outputs. Note that you will need to set the FIGURL_CHANNEL environment variable to a channel for which you have file upload permissions.
+
+```bash
+./sorting-figurl
+./workflow
+```
+
+Print the results
+
+```bash
+./print-results
+```
+
+Finally, generate the figurl link to the results of the workflow. Once again, you will need to set the FIGURL_CHANNEL environment variable to a channel for which you have file upload permissions.
+
+```bash
+./results-figurl
+```
+
+This will print a URL. For example:
+
+https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=73e428abc3b8ad627fe4faa702318ba67b6f39a3&channel=flatiron1&label=SF%20workflow%20results%3A%20test-docker
