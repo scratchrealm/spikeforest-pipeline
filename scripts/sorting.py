@@ -9,6 +9,7 @@ import runarepo
 from typing import List, Union
 import kachery_client as kc
 from Job import Job
+from multiprocessing import Pool
 
 def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dict, use_docker: bool=False, use_singularity: bool=False, image: Union[str, None]=None) -> dict:
     with kc.TemporaryDirectory() as tmpdir:
@@ -62,17 +63,23 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
 @click.command()
 @click.argument('config_file')
 @click.argument('algorithm')
-@click.option('--force-run', is_flag=True, help="Force rerun")
+@click.option('--max-simultaneous-sorts', is_flag=True, help="Maximum number of sorting jobs to run simultaneously")
+@click.option('--force-run', is_flag=True, help="Force rerurn")
 @click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
 @click.option('--docker', is_flag=True, help="Use docker image")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
-def main(config_file: str, algorithm: str, force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
+def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, None], force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
+    if docker and singularity:
+        raise Exception('Both singularity and docker were requested, but no more than one can be used simultaneously.')
+    if max_simultaneous_sorts is None or max_simultaneous_sorts < 1:
+        max_simultaneous_sorts = 1
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
     jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
+    #### TODO: Should this 'algorithm' actually be 'name'?
     jobs = [job for job in jobs if job.type == 'sorting' and job.kwargs['algorithm'] == algorithm]
     jobs_to_run: List[Job] = []
     for job in jobs:
@@ -85,13 +92,22 @@ def main(config_file: str, algorithm: str, force_run: bool, rerun_failing: bool,
     print('')
     print(f'Total number of jobs: {len(jobs)}')
     print(f'Number of jobs to run: {len(jobs_to_run)}')
+    print(f'Number of jobs run simultaneously: {max_simultaneous_sorts}')
 
-    for job in jobs_to_run:
+    def _run_sorting_job_wrapper(job: Job) -> None:
         print(f'Running: {job.label}')
         output = _run_sorting_job(**job.kwargs, use_docker=docker, use_singularity=singularity, image=image)
-        print('OUTPUT')
-        print(output)
+        print(f"OUTPUT of {job.label}:\n{output}")
         kc.set(job.key(), output)
+
+    if (max_simultaneous_sorts == 1):
+        for job in jobs_to_run:
+            _run_sorting_job_wrapper(job)
+    else:
+        pool = Pool(max_simultaneous_sorts)
+        list(pool.imap(_run_sorting_job_wrapper, jobs_to_run, chunksize=len(jobs_to_run)//max_simultaneous_sorts))
+        pool.close()
+        pool.join()
 
 if __name__ == '__main__':
     main()
