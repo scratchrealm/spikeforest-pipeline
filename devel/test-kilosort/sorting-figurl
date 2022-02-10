@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/sorting_figurl.py \
+    config.yaml \
+    "$@"

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -ex
+
+./workflow
+./prepare
+./workflow
+
+./kilosort3
+
+./workflow
+./compare
+./workflow
+
+./sorting-figurl
+./workflow
+
+./results-figurl
