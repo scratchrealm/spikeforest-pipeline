@@ -21,6 +21,10 @@ sorters:
     name: tridesclous
     algorithm: tridesclous
     sorting_params: {}
+  -
+    name: kilosort3
+    algorithm: kilosort3
+    sorting_params: {}
 studies:
   -
     study_set_name: PAIRED_BOYDEN
@@ -30,6 +34,7 @@ studies:
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - kilosort3
   -
     study_set_name: PAIRED_CRCNS_HC1
     study_name: paired_crcns
@@ -38,6 +43,7 @@ studies:
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - kilosort3
   -
     study_set_name: PAIRED_ENGLISH
     study_name: paired_english
@@ -46,6 +52,7 @@ studies:
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - kilosort3
   -
     study_set_name: PAIRED_KAMPFF
     study_name: paired_kampff
@@ -55,6 +62,7 @@ studies:
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - kilosort3
   -
     study_set_name: PAIRED_MEA64C_YGER
     study_name: paired_mea64c
@@ -63,6 +71,7 @@ studies:
     sorter_names:
       - mountainsort4
       - spykingcircus
+      - kilosort3
   -
     study_set_name: SYNTH_MAGLAND
     study_name: synth_magland_noise10_K10_C4
