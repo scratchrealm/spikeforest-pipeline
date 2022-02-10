@@ -53,8 +53,12 @@ def main(config_file: str):
             for sorter in config_sorters: # for each sorter
                 # do the spike sorting for the given sorter
                 sorting_out = _sorting(workflow, recording, recording_nwb_uri, sorter)
-                sorting_npz_uri = sorting_out['sorting_npz_uri']
-                sorting_console_lines_uri = sorting_out['console_lines_uri']
+                if sorting_out is not None:
+                    sorting_npz_uri = sorting_out['sorting_npz_uri']
+                    sorting_console_lines_uri = sorting_out['console_lines_uri']
+                else:
+                    sorting_npz_uri = None
+                    sorting_console_lines_uri = None
                 # sorting figurl
                 sorting_figurl = _get_sorting_figurl(workflow, recording, sorter, recording_nwb_uri, sorting_npz_uri, sorting_console_lines_uri)
                 # compare with truth
