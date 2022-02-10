@@ -83,7 +83,11 @@ def main(config_file: str):
     # Print the jobs
     print('JOBS:')
     for job in workflow.jobs:
-        print(f'{job.type}: {job.label}')
+        if kc.get(job.key()) is None:
+            a = '* '
+        else:
+            a = ''
+        print(f'{a}{job.type}: {job.label}')
     print('-----------------------------')
     # Print the results
     print('RESULTS:')

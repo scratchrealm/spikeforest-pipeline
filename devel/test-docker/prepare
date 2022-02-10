@@ -2,5 +2,5 @@
 
 export BASEDIR="../.."
 
-$BASEDIR/scripts/prepare_recording_nwb.py config.yaml
+$BASEDIR/scripts/prepare_recording_nwb.py config.yaml "$@"
 $BASEDIR/scripts/prepare_sorting_true_npz.py config.yaml

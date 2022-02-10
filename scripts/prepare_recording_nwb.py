@@ -28,7 +28,8 @@ def _run_prepare_recording_nwb_job(recording_uri: str) -> dict:
 
 @click.command()
 @click.argument('config_file')
-def main(config_file: str):
+@click.option('--force-run', is_flag=True, help="Force rerun")
+def main(config_file: str, force_run: bool):
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
@@ -37,7 +38,7 @@ def main(config_file: str):
     jobs = [job for job in jobs if job.type == 'prepare-recording-nwb']
     jobs_to_run = [
         job for job in jobs
-        if job.force_run or (kc.get(job.key()) is None)
+        if force_run or job.force_run or (kc.get(job.key()) is None)
     ]
     print('JOBS TO RUN:')
     for job in jobs_to_run:
