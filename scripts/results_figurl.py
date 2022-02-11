@@ -18,6 +18,8 @@ def main(config_file: str):
     results = kc.get({'type': 'spikeforest-workflow-results', 'name': config_name})
     for result in results:
         result['comparison_with_truth'] = kc.load_json(result['comparison_with_truth_uri'])
+    for result in results:
+        result['sorting_true_metrics'] = kc.load_json(result['sorting_true_metrics_uri']) if result.get('sorting_true_metrics_uri') else None
     F = figurl.Figure(
         data={'type': 'spikeforest-workflow-results', 'results': results},
         view_url='gs://figurl/spikeforestview-1'

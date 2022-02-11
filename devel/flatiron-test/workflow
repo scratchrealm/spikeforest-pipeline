@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/workflow.py config.yaml

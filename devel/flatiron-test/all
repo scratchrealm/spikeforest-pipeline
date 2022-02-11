@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# 2/8/22
+# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=1ab9eb7cc5d3ddc2548286a2734f323e22a715c6&channel=flatiron1&label=SF%20workflow%20results%3A%20flatiron
+
+set -ex
+
+./workflow
+
+./prepare
+
+./sorting-metrics
+
+./mountainsort4
+
+./compare
+
+./sorting-figurl
+
+./results-figurl

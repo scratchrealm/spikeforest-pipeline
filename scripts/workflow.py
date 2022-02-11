@@ -56,6 +56,10 @@ def main(config_file: str):
             recording_nwb_uri = _prepare_recording_nwb(workflow, recording)
             # prepare sorting_true.npz
             sorting_true_npz_uri = _prepare_sorting_true_npz(workflow, recording)
+
+            # sorting true metrics
+            sorting_true_metrics_uri = _sorting_metrics(workflow, recording, recording_nwb_uri, sorting_true_npz_uri)
+
             for sorter in sorters0: # for each sorter
                 # do the spike sorting for the given sorter
                 sorting_out = _sorting(workflow, recording, recording_nwb_uri, sorter)
@@ -76,6 +80,7 @@ def main(config_file: str):
                         'sorter': sorter,
                         'recording_nwb_uri': recording_nwb_uri,
                         'sorting_true_npz_uri': sorting_true_npz_uri,
+                        'sorting_true_metrics_uri': sorting_true_metrics_uri,
                         'sorting_npz_uri': sorting_npz_uri,
                         'sorting_console_lines_uri': sorting_console_lines_uri,
                         'comparison_with_truth_uri': comparison_uri,
@@ -132,6 +137,25 @@ def _prepare_sorting_true_npz(workflow: Workflow, recording: dict):
     sorting_true_npz_uri = output.get('sorting_true_npz_uri', None) if output is not None else None
     sorting_true_npz_uri = sorting_true_npz_uri if sorting_true_npz_uri and kc.load_file(sorting_true_npz_uri, local_only=True) is not None else None
     return sorting_true_npz_uri
+
+def _sorting_metrics(workflow: Workflow, recording: dict, recording_nwb_uri: Union[str, None], sorting_npz_uri: Union[str, None]):
+    if recording_nwb_uri is None: return None
+    if sorting_npz_uri is None: return None
+    recording_label = f'{recording["studyName"]}/{recording["name"]}'
+    job = Job(
+        type='sorting-metrics',
+        label=f'Sorting true metrics: {recording_label}',
+        kwargs={
+            'recording_nwb_uri': recording_nwb_uri,
+            'sorting_npz_uri': sorting_npz_uri
+        },
+        force_run=False
+    )
+    workflow.add_job(job)
+    output = kc.get(job.key())
+    sorting_metrics_uri = output.get('sorting_metrics_uri', None) if output is not None else None
+    sorting_metrics_uri = sorting_metrics_uri if sorting_metrics_uri and kc.load_file(sorting_metrics_uri, local_only=True) is not None else None
+    return sorting_metrics_uri
 
 def _sorting(workflow: Workflow, recording: dict, recording_nwb_uri: Union[str, None], sorter: dict):
     if recording_nwb_uri is None: return None

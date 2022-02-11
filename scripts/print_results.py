@@ -25,6 +25,7 @@ def main(config_file: str, json_format: str):
             sorter = result['sorter']
             recording_nwb_uri = result['recording_nwb_uri']
             sorting_true_npz_uri = result['sorting_true_npz_uri']
+            sorting_true_metrics_uri = result.get('sorting_true_metrics_uri', None)
             sorting_npz_uri = result['sorting_npz_uri']
             sorting_console_lines_uri = result.get('sorting_console_lines_uri', None)
             comparison_with_truth_uri: dict = result['comparison_with_truth_uri']
@@ -34,6 +35,7 @@ def main(config_file: str, json_format: str):
             print(f'SORTER: {sorter["name"]}')
             print(f'Recording nwb: {recording_nwb_uri}')
             print(f'Sorting true npz: {sorting_true_npz_uri}')
+            print(f'Sorting true metrics: {sorting_true_metrics_uri}')
             print(f'Sorting npz: {sorting_npz_uri}')
             print(f'Sorting console: {sorting_console_lines_uri}')
             print(f'Sorting figurl: {sorting_figurl}')

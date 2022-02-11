@@ -1,0 +1,23 @@
+name: flatiron
+sorters:
+  -
+    name: mountainsort4
+    algorithm: mountainsort4
+    sorting_params:
+      detect_sign: -1
+      adjacency_radius: 50
+      freq_min: 300
+      freq_max: 6000
+      filter: True
+      whiten: True
+      clip_size: 50
+      detect_threshold: 3
+      detect_interval: 10
+studies:
+  -
+    study_set_name: PAIRED_BOYDEN
+    study_name: paired_boyden32c
+    recording_names:
+      - "1103_1_1"
+    sorter_names:
+      - mountainsort4
