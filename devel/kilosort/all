@@ -11,6 +11,7 @@ set -ex
 
 ./kilosort3
 ./kilosort2_5
+./kilosort2
 
 ./compare
 

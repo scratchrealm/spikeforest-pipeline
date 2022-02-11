@@ -24,7 +24,9 @@ def _run_compare_with_truth(sorting_npz_uri: str, sorting_true_npz_uri: str, use
             runarepo.Input(name='INPUT_SORTING_NPZ', path=sorting_npz_path),
             runarepo.Input(name='INPUT_SORTING_TRUE_NPZ', path=sorting_true_npz_path)
         ]
-        runarepo.run(repo, subpath=subpath, inputs=inputs, output_dir=output_dir, use_docker=use_docker, use_singularity=use_singularity, image=image)
+        output = runarepo.run(repo, subpath=subpath, inputs=inputs, output_dir=output_dir, use_docker=use_docker, use_singularity=use_singularity, image=image)
+        if output.retcode != 0:
+            raise Exception(f'Non-zero return code in comparison: {output.retcode}')
 
         print('Storing comparison output...')
         comparison_uri = kc.store_file(f'{output_dir}/comparison.json')

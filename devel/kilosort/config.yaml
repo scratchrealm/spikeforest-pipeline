@@ -8,6 +8,10 @@ sorters:
     name: kilosort2_5
     algorithm: kilosort2_5
     sorting_params: {}
+  -
+    name: kilosort2
+    algorithm: kilosort2
+    sorting_params: {}
 studies:
   -
     study_set_name: PAIRED_BOYDEN
@@ -16,6 +20,7 @@ studies:
       - "1103_1_1"
     sorter_names:
       - kilosort2_5
+      - kilosort2
   -
     study_set_name: PAIRED_CRCNS_HC1
     study_name: paired_crcns
@@ -23,6 +28,7 @@ studies:
       - "d11221_d11221.001"
     sorter_names:
       - kilosort2_5
+      - kilosort2
   -
     study_set_name: PAIRED_ENGLISH
     study_name: paired_english
@@ -31,6 +37,7 @@ studies:
     sorter_names:
       - kilosort3
       - kilosort2_5
+      - kilosort2
   -
     study_set_name: PAIRED_KAMPFF
     study_name: paired_kampff
@@ -40,6 +47,7 @@ studies:
     sorter_names:
       - kilosort3
       - kilosort2_5
+      - kilosort2
   -
     study_set_name: PAIRED_MEA64C_YGER
     study_name: paired_mea64c
@@ -48,3 +56,4 @@ studies:
     sorter_names:
       - kilosort3
       - kilosort2_5
+      - kilosort2
