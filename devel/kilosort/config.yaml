@@ -1,0 +1,50 @@
+name: flatiron
+sorters:
+  -
+    name: kilosort3
+    algorithm: kilosort3
+    sorting_params: {}
+  -
+    name: kilosort2_5
+    algorithm: kilosort2_5
+    sorting_params: {}
+studies:
+  -
+    study_set_name: PAIRED_BOYDEN
+    study_name: paired_boyden32c
+    recording_names:
+      - "1103_1_1"
+    sorter_names:
+      - kilosort2_5
+  -
+    study_set_name: PAIRED_CRCNS_HC1
+    study_name: paired_crcns
+    recording_names:
+      - "d11221_d11221.001"
+    sorter_names:
+      - kilosort2_5
+  -
+    study_set_name: PAIRED_ENGLISH
+    study_name: paired_english
+    recording_names:
+      - "m108_191125_163508"
+    sorter_names:
+      - kilosort3
+      - kilosort2_5
+  -
+    study_set_name: PAIRED_KAMPFF
+    study_name: paired_kampff
+    recording_names:
+      - 2014_11_25_Pair_3_0
+      - 2015_09_03_Pair_9_0A
+    sorter_names:
+      - kilosort3
+      - kilosort2_5
+  -
+    study_set_name: PAIRED_MEA64C_YGER
+    study_name: paired_mea64c
+    recording_names:
+      - "20160415_patch2"
+    sorter_names:
+      - kilosort3
+      - kilosort2_5

@@ -42,7 +42,13 @@ def main(config_file: str):
 
     for config_study in config_studies: # for each study
         # Get the sorters to be run for this study
-        config_sorters = [[s for s in config_sorters if s['name'] == sorter_name][0] for sorter_name in config_study['sorter_names']]
+        sorters0: List[dict] = []
+        for sorter_name in config_study['sorter_names']:
+            x = [s for s in config_sorters if s['name'] == sorter_name]
+            if len(x) == 0:
+                raise Exception(f'Sorter not found in config: {sorter_name}')
+            assert len(x) == 1, f'Unexpected: duplicate sorter found in config: {sorter_name}'
+            sorters0.append(x[0])
         for recording_name in config_study['recording_names']: # for each recording
             # load the recording dict from the spikeforest study sets
             recording = _get_spikeforest_recording(sf_study_sets, config_study['study_set_name'], config_study['study_name'], recording_name)
@@ -50,7 +56,7 @@ def main(config_file: str):
             recording_nwb_uri = _prepare_recording_nwb(workflow, recording)
             # prepare sorting_true.npz
             sorting_true_npz_uri = _prepare_sorting_true_npz(workflow, recording)
-            for sorter in config_sorters: # for each sorter
+            for sorter in sorters0: # for each sorter
                 # do the spike sorting for the given sorter
                 sorting_out = _sorting(workflow, recording, recording_nwb_uri, sorter)
                 if sorting_out is not None:

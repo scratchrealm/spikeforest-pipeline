@@ -3,7 +3,7 @@
 export BASEDIR="../.."
 
 $BASEDIR/scripts/sorting.py \
-    config.yaml kilosort3 \
+    config.yaml kilosort2_5 \
     "$@"
 
 ./workflow

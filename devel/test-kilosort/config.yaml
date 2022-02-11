@@ -4,6 +4,10 @@ sorters:
     name: kilosort3
     algorithm: kilosort3
     sorting_params: {}
+  -
+    name: kilosort2_5
+    algorithm: kilosort2_5
+    sorting_params: {}
 studies:
   -
     study_set_name: PAIRED_KAMPFF
@@ -12,3 +16,4 @@ studies:
       - 2014_11_25_Pair_3_0
     sorter_names:
       - kilosort3
+      - kilosort2_5

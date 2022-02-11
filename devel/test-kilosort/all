@@ -4,15 +4,12 @@ set -ex
 
 ./workflow
 ./prepare
-./workflow
 
 ./kilosort3
+./kilosort2_5
 
-./workflow
 ./compare
-./workflow
 
 ./sorting-figurl
-./workflow
 
 ./results-figurl
