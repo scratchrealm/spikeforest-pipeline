@@ -5,3 +5,5 @@ export BASEDIR="../.."
 $BASEDIR/scripts/sorting.py \
     config.yaml kilosort3 \
     "$@"
+
+./workflow

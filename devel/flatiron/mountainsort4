@@ -6,3 +6,5 @@ $BASEDIR/scripts/sorting.py \
     config.yaml mountainsort4 \
     --singularity --image docker://docker.flatironinstitute.org/magland/mountainsort4-rar \
     "$@"
+
+./workflow

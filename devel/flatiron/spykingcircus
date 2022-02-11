@@ -6,3 +6,5 @@ $BASEDIR/scripts/sorting.py \
     config.yaml spykingcircus \
     --singularity --image docker://docker.flatironinstitute.org/magland/spykingcircus-rar \
     "$@"
+
+./workflow

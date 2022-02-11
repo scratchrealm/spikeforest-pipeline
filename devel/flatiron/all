@@ -7,21 +7,15 @@ set -ex
 
 ./workflow
 ./prepare
-./workflow
+
+./sorting-metrics
 
 ./mountainsort4
-
 ./spykingcircus
-
-./tridesclous
-
 ./kilosort3
 
-./workflow
 ./compare
-./workflow
 
 ./sorting-figurl
-./workflow
 
 ./results-figurl

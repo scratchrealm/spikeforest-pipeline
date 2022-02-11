@@ -6,3 +6,5 @@ $BASEDIR/scripts/sorting.py \
     config.yaml tridesclous \
     --singularity --image docker://docker.flatironinstitute.org/magland/tridesclous-rar \
     "$@"
+
+./workflow

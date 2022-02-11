@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/sorting_metrics.py \
+    config.yaml \
+    --singularity --image docker://docker.flatironinstitute.org/magland/sorting-metrics-rar \
+    "$@"
+
+./workflow

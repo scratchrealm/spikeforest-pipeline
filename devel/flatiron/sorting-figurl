@@ -7,3 +7,5 @@ export FIGURL_CHANNEL=flatiron1
 $BASEDIR/scripts/sorting_figurl.py \
     config.yaml \
     "$@"
+
+./workflow

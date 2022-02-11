@@ -128,6 +128,7 @@ def _prepare_sorting_true_npz(workflow: Workflow, recording: dict):
         type='prepare-sorting-true-npz',
         label=f'Prepare sorting true npz: {recording_label}',
         kwargs={
+            'recording_uri': recording['recordingUri'],
             'sorting_true_uri': recording['sortingTrueUri']
         },
         force_run=False

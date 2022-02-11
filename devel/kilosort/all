@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# 2/8/22
-# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=1ab9eb7cc5d3ddc2548286a2734f323e22a715c6&channel=flatiron1&label=SF%20workflow%20results%3A%20flatiron
+# 2/11/22
+# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=7b210db7fb1f0bb304065aaaaf59f9c3c565a982&channel=flatiron1&label=SF%20workflow%20results%3A%20flatiron
 
 set -ex
 
 ./workflow
 
-./prepare
+./prepare-recording
+./prepare-sorting-true
+
+./sorting-metrics
 
 ./kilosort3
 ./kilosort2_5
