@@ -10,6 +10,7 @@ set -ex
 ./prepare
 
 ./kilosort3
+./kilosort2_5
 
 ./compare
 

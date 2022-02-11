@@ -1,0 +1,9 @@
+#!/bin/bash
+
+export BASEDIR="../.."
+
+$BASEDIR/scripts/sorting.py \
+    config.yaml kilosort2_5 \
+    "$@"
+
+./workflow

@@ -41,34 +41,42 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
             runarepo.Input(name='INPUT_SORTING_PARAMS', path=sorting_params_path)
         ]
         output = runarepo.run(repo, subpath=subpath, inputs=inputs, output_dir=output_dir, use_docker=use_docker, use_singularity=use_singularity, image=image)
-        print('Storing sorting output...')
-        sorting_npz_path = f'{output_dir}/sorting.npz'
-        sorting_npz_uri = kc.store_file(sorting_npz_path)
+        print(f'Storing console ouput')
         console_lines_uri = kc.store_json(output.console_lines)
+        if output.retcode == 0:
+            print('Storing sorting output...')
+            sorting_npz_path = f'{output_dir}/sorting.npz'
+            sorting_npz_uri = kc.store_file(sorting_npz_path)
+        else:
+            print(f'Nonzero exit code for sorting run: {output.retcode}')
+            sorting_npz_uri = None
         
         return {
-            'sorting_npz_uri': sorting_npz_uri,
-            'console_lines_uri': console_lines_uri
+            'retcode': output.retcode,
+            'console_lines_uri': console_lines_uri,
+            'sorting_npz_uri': sorting_npz_uri
         }
 
 @click.command()
 @click.argument('config_file')
 @click.argument('algorithm')
 @click.option('--force-run', is_flag=True, help="Force rerun")
+@click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
 @click.option('--docker', is_flag=True, help="Use docker image")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
-def main(config_file: str, algorithm: str, force_run: bool, docker: bool, singularity: bool, image: Union[str, None]):
+def main(config_file: str, algorithm: str, force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
     jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
     jobs = [job for job in jobs if job.type == 'sorting' and job.kwargs['algorithm'] == algorithm]
-    jobs_to_run = [
-        job for job in jobs
-        if force_run or job.force_run or (kc.get(job.key()) is None)
-    ]
+    jobs_to_run: List[Job] = []
+    for job in jobs:
+        a = kc.get(job.key())
+        if force_run or job.force_run or (a is None) or (a['sorting_npz_uri'] is None and rerun_failing):
+            jobs_to_run.append(job)
     print('JOBS TO RUN:')
     for job in jobs_to_run:
         print(job.label)
