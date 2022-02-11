@@ -33,7 +33,16 @@ studies:
     study_set_name: PAIRED_ENGLISH
     study_name: paired_english
     recording_names:
-      - "m108_191125_163508"
+      - "m26_190524_100859_cell3"
+      - "m57_191105_160026"
+      - "m113_191125_204935"
+      - "m57_191105_141906"
+      - "m139_200114_222743"
+      - "m15_190315_150831_cell1"
+      - "m139_200114_205038"
+      - "m57_191105_161455"
+      - "m139_200114_191955"
+      - "m108_191125_171427"
     sorter_names:
       - kilosort3
       - kilosort2_5
