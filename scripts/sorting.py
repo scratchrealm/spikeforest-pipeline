@@ -96,7 +96,6 @@ def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, No
     jobs_to_run: List[Job] = []
     for job in jobs:
         a = kc.get(job.key())
-        print(f"Checking job with key {a}, force_run is {force_run}")
         if force_run or job.force_run or (a is None) or (a['sorting_npz_uri'] is None and rerun_failing):
             jobs_to_run.append(job)
     print('JOBS TO RUN:')
