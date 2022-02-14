@@ -10,6 +10,7 @@ from typing import List, Union
 import kachery_client as kc
 from Job import Job
 from multiprocessing import Pool
+from functools import partial
 
 def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dict, use_docker: bool=False, use_singularity: bool=False, image: Union[str, None]=None) -> dict:
     with kc.TemporaryDirectory() as tmpdir:
@@ -60,10 +61,17 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
             'sorting_npz_uri': sorting_npz_uri
         }
 
+def _run_sorting_jobs_wrapper(job: Job, **kwargs):
+    print(f'Running: {job.label}')
+    output = _run_sorting_job(**job.kwargs, **kwargs)
+    print(f'OUTPUT of {job.label}:\n{output}')
+    kc.set(job.key(), output)
+
+
 @click.command()
 @click.argument('config_file')
 @click.argument('algorithm')
-@click.option('--max-simultaneous-sorts', is_flag=True, help="Maximum number of sorting jobs to run simultaneously")
+@click.option('--max-simultaneous-sorts', help="Maximum number of sorting jobs to run simultaneously")
 @click.option('--force-run', is_flag=True, help="Force rerurn")
 @click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
 @click.option('--docker', is_flag=True, help="Use docker image")
@@ -72,7 +80,11 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
 def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, None], force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
     if docker and singularity:
         raise Exception('Both singularity and docker were requested, but no more than one can be used simultaneously.')
-    if max_simultaneous_sorts is None or max_simultaneous_sorts < 1:
+    try:
+        max_simultaneous_sorts = int(max_simultaneous_sorts)
+        if max_simultaneous_sorts < 1:
+            max_simultaneous_sorts = 1
+    except:
         max_simultaneous_sorts = 1
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
@@ -84,6 +96,7 @@ def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, No
     jobs_to_run: List[Job] = []
     for job in jobs:
         a = kc.get(job.key())
+        print(f"Checking job with key {a}, force_run is {force_run}")
         if force_run or job.force_run or (a is None) or (a['sorting_npz_uri'] is None and rerun_failing):
             jobs_to_run.append(job)
     print('JOBS TO RUN:')
@@ -94,18 +107,15 @@ def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, No
     print(f'Number of jobs to run: {len(jobs_to_run)}')
     print(f'Number of jobs run simultaneously: {max_simultaneous_sorts}')
 
-    def _run_sorting_job_wrapper(job: Job) -> None:
-        print(f'Running: {job.label}')
-        output = _run_sorting_job(**job.kwargs, use_docker=docker, use_singularity=singularity, image=image)
-        print(f"OUTPUT of {job.label}:\n{output}")
-        kc.set(job.key(), output)
+    # Curry the command line parameters so we can just pass the Job object later on.
+    run_sorting_job_partial = partial(_run_sorting_jobs_wrapper, use_docker=docker, use_singularity=singularity, image=image)
 
     if (max_simultaneous_sorts == 1):
         for job in jobs_to_run:
-            _run_sorting_job_wrapper(job)
+            run_sorting_job_partial(job)
     else:
         pool = Pool(max_simultaneous_sorts)
-        list(pool.imap(_run_sorting_job_wrapper, jobs_to_run, chunksize=len(jobs_to_run)//max_simultaneous_sorts))
+        list(pool.imap(run_sorting_job_partial, jobs_to_run, chunksize=max(1, len(jobs_to_run)//max_simultaneous_sorts)))
         pool.close()
         pool.join()
 
