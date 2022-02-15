@@ -9,6 +9,8 @@ import runarepo
 from typing import List, Union
 import kachery_client as kc
 from Job import Job
+from multiprocessing import Pool
+from functools import partial
 
 def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dict, use_docker: bool=False, use_singularity: bool=False, image: Union[str, None]=None) -> dict:
     with kc.TemporaryDirectory() as tmpdir:
@@ -59,20 +61,35 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
             'sorting_npz_uri': sorting_npz_uri
         }
 
+def _run_sorting_jobs_wrapper(job: Job, **kwargs):
+    print(f'Running: {job.label}')
+    output = _run_sorting_job(**job.kwargs, **kwargs)
+    print(f'OUTPUT of {job.label}:\n{output}')
+    kc.set(job.key(), output)
+
+
 @click.command()
 @click.argument('config_file')
 @click.argument('algorithm')
-@click.option('--force-run', is_flag=True, help="Force rerun")
+@click.option('--num-parallel', help="Maximum number of sorting jobs to run simultaneously")
+@click.option('--force-run', is_flag=True, help="Force rerurn")
 @click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
 @click.option('--docker', is_flag=True, help="Use docker image")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
-def main(config_file: str, algorithm: str, force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
+def main(config_file: str, algorithm: str, num_parallel: Union[int, None], force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
+    if docker and singularity:
+        raise Exception('Both singularity and docker were requested, but no more than one can be used simultaneously.')
+    if num_parallel is None:
+        num_parallel = 1
+    else:
+        num_parallel = max(1, int(num_parallel))
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
     jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
     jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
+    #### TODO: Should this 'algorithm' actually be 'name'?
     jobs = [job for job in jobs if job.type == 'sorting' and job.kwargs['algorithm'] == algorithm]
     jobs_to_run: List[Job] = []
     for job in jobs:
@@ -85,13 +102,19 @@ def main(config_file: str, algorithm: str, force_run: bool, rerun_failing: bool,
     print('')
     print(f'Total number of jobs: {len(jobs)}')
     print(f'Number of jobs to run: {len(jobs_to_run)}')
+    print(f'Number of jobs run simultaneously: {num_parallel}')
 
-    for job in jobs_to_run:
-        print(f'Running: {job.label}')
-        output = _run_sorting_job(**job.kwargs, use_docker=docker, use_singularity=singularity, image=image)
-        print('OUTPUT')
-        print(output)
-        kc.set(job.key(), output)
+    # Curry the command line parameters so we can just pass the Job object later on.
+    run_sorting_job_partial = partial(_run_sorting_jobs_wrapper, use_docker=docker, use_singularity=singularity, image=image)
+
+    if (num_parallel == 1):
+        for job in jobs_to_run:
+            run_sorting_job_partial(job)
+    else:
+        pool = Pool(num_parallel)
+        list(pool.imap(run_sorting_job_partial, jobs_to_run, chunksize=max(1, len(jobs_to_run)//num_parallel)))
+        pool.close()
+        pool.join()
 
 if __name__ == '__main__':
     main()
