@@ -7,6 +7,7 @@ import sortingview as sv
 import kachery_client as kc
 from Job import Job
 from spikeinterface.core.old_api_utils import OldToNewRecording
+from spikeinterface.toolkit.preprocessing import bandpass_filter
 from nwb_conversion_tools.utils.spike_interface import write_recording
 import spikeinterface.extractors as se
 
@@ -20,6 +21,9 @@ def _run_prepare_recording_nwb_job(recording_uri: str) -> dict:
         recording = sv.LabboxEphysRecordingExtractor(recording_object)
         recording = OldToNewRecording(recording)
         recording.clear_channel_groups()
+
+        recording = bandpass_filter(recording=recording, freq_min=300., freq_max=6000., margin_ms=5.0, dtype='float32')
+
         print('Writing recording nwb...')
         write_recording(recording, save_path=recording_nwb_path, compression=None, compression_opts=None)
         print('Storing recording nwb...')
