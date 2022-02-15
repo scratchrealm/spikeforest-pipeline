@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 2/11/22
-# https://figurl.org/f?v=gs://figurl/spikeforestview-1&d=7b210db7fb1f0bb304065aaaaf59f9c3c565a982&channel=flatiron1&label=SF%20workflow%20results%3A%20flatiron
+# 2/15/22
+# https://www.figurl.org/f?v=gs://figurl/spikeforestview-1&d=902f00af1b7d4a4e36c2c916ee8a9b8e3992ef67&channel=flatiron1&label=SF%20workflow%20results%3A%20kilosort
 
 set -ex
 

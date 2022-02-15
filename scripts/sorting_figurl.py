@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os
+import numpy as np
 import click
 import yaml
 from typing import List, Union
@@ -9,7 +9,7 @@ from Job import Job
 from spikeinterface import extractors as se
 from spikeinterface.core.old_api_utils import NewToOldSorting
 import sortingview as sv
-from sortingview.SpikeSortingView import SpikeSortingView, create_console_view
+from sortingview.SpikeSortingView import SpikeSortingView, create_console_view, create_raw_traces_plot
 
 def _run_sorting_figurl(recording_nwb_uri: str, sorting_npz_uri: str, label: str, sorting_console_lines_uri: Union[str, None]=None) -> dict:
     recording_nwb = kc.load_file(recording_nwb_uri)
@@ -58,12 +58,27 @@ def _run_sorting_figurl(recording_nwb_uri: str, sorting_npz_uri: str, label: str
     # f8 = X.create_live_cross_correlograms()
 
     figures = [f1, f2, f3, f4, f5, f6, f7]
+
+    print('Preparing traces sample')
+    traces_sample = recording.get_traces(
+        start_frame=0,
+        end_frame=int(1 * recording.get_sampling_frequency())
+    ).T.astype(np.float32)
+    traces_figure = create_raw_traces_plot(
+        start_time_sec=0,
+        sampling_frequency=recording.get_sampling_frequency(),
+        traces=traces_sample,
+        label='Traces (sample)'
+    )
+    figures.append(traces_figure)
+    
     if sorting_console_lines is not None:
         print('Preparing console view')
         figures.append(
             create_console_view(console_lines=sorting_console_lines)
         )
 
+    print('Creating mountain layout')
     mountain_layout = X.create_mountain_layout(figures=figures, label=label)
 
     url = mountain_layout.url()
@@ -71,7 +86,7 @@ def _run_sorting_figurl(recording_nwb_uri: str, sorting_npz_uri: str, label: str
 
 @click.command()
 @click.argument('config_file')
-@click.option('--force-run', is_flag=True, help="Force rerurn")
+@click.option('--force-run', is_flag=True, help="Force rerun")
 def main(config_file: str, force_run: bool):
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)

@@ -6,7 +6,9 @@
 set -ex
 
 ./workflow
-./prepare
+
+./prepare-recording
+./prepare-sorting-true
 
 ./sorting-metrics
 

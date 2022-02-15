@@ -35,7 +35,7 @@ def _run_sorting_metrics(recording_nwb_uri: str, sorting_npz_uri: str, use_docke
 @click.command()
 @click.argument('config_file')
 @click.option('--docker', is_flag=True, help="Use docker images")
-@click.option('--force-run', is_flag=True, help="Force rerurn")
+@click.option('--force-run', is_flag=True, help="Force rerun")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
 def main(config_file: str, docker: bool, force_run: bool, singularity: bool, image: Union[str, None]):

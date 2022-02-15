@@ -1,4 +1,4 @@
-name: flatiron
+name: kilosort
 sorters:
   -
     name: kilosort3
@@ -43,6 +43,11 @@ studies:
       - "m57_191105_161455"
       - "m139_200114_191955"
       - "m108_191125_171427"
+      - "m57_191105_153915"
+      - "m26_190524_100859_cell1"
+      - "m14_190326_155432"
+      - "m15_190315_152315_cell1"
+      - "m15_190315_142052_cell1"
     sorter_names:
       - kilosort3
       - kilosort2_5
