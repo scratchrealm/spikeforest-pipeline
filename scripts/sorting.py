@@ -71,21 +71,19 @@ def _run_sorting_jobs_wrapper(job: Job, **kwargs):
 @click.command()
 @click.argument('config_file')
 @click.argument('algorithm')
-@click.option('--max-simultaneous-sorts', help="Maximum number of sorting jobs to run simultaneously")
+@click.option('--num-parallel', help="Maximum number of sorting jobs to run simultaneously")
 @click.option('--force-run', is_flag=True, help="Force rerurn")
 @click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
 @click.option('--docker', is_flag=True, help="Use docker image")
 @click.option('--singularity', is_flag=True, help="Use singularity image")
 @click.option('--image', default=None, help='Image for use in docker or singularity mode')
-def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, None], force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
+def main(config_file: str, algorithm: str, num_parallel: Union[int, None], force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
     if docker and singularity:
         raise Exception('Both singularity and docker were requested, but no more than one can be used simultaneously.')
-    try:
-        max_simultaneous_sorts = int(max_simultaneous_sorts)
-        if max_simultaneous_sorts < 1:
-            max_simultaneous_sorts = 1
-    except:
-        max_simultaneous_sorts = 1
+    if num_parallel is None:
+        num_parallel = 1
+    else:
+        num_parallel = max(1, int(num_parallel))
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
@@ -104,17 +102,17 @@ def main(config_file: str, algorithm: str, max_simultaneous_sorts: Union[int, No
     print('')
     print(f'Total number of jobs: {len(jobs)}')
     print(f'Number of jobs to run: {len(jobs_to_run)}')
-    print(f'Number of jobs run simultaneously: {max_simultaneous_sorts}')
+    print(f'Number of jobs run simultaneously: {num_parallel}')
 
     # Curry the command line parameters so we can just pass the Job object later on.
     run_sorting_job_partial = partial(_run_sorting_jobs_wrapper, use_docker=docker, use_singularity=singularity, image=image)
 
-    if (max_simultaneous_sorts == 1):
+    if (num_parallel == 1):
         for job in jobs_to_run:
             run_sorting_job_partial(job)
     else:
-        pool = Pool(max_simultaneous_sorts)
-        list(pool.imap(run_sorting_job_partial, jobs_to_run, chunksize=max(1, len(jobs_to_run)//max_simultaneous_sorts)))
+        pool = Pool(num_parallel)
+        list(pool.imap(run_sorting_job_partial, jobs_to_run, chunksize=max(1, len(jobs_to_run)//num_parallel)))
         pool.close()
         pool.join()
 
