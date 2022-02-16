@@ -67,7 +67,6 @@ def _run_sorting_jobs_wrapper(job: Job, config_name: str, verbose: bool, dry_run
         if (verbose): print(f"\tUnable to get lock {job_key}, skipping.")
         return
     if (verbose): print(f"\tGot lock for job {job_key}")
-    # try:
     print(f'Running: {job.label}')
     if (not dry_run):
         output = _run_sorting_job(**job.kwargs, **kwargs)
@@ -75,11 +74,6 @@ def _run_sorting_jobs_wrapper(job: Job, config_name: str, verbose: bool, dry_run
     else:
         output = "DRY RUN: JOB SKIPPED"
     print(f'OUTPUT of {job.label}:\n{output}')
-    # Actually we don't want to do this--it can result in re-running jobs.
-    # finally:
-    #     kc.delete(job_key) # Release the mutex (needs to happen even if something failed)
-    #     if (verbose): print(f"\tReleasing lock {job_key}")
-    #     # NOTE POSSIBILITY FOR INFINITE LOOP if running with rerun-failing
 
 def _get_job_key(label: str, config_name: str):
     return f"{config_name}-running-sorting-{label}"
