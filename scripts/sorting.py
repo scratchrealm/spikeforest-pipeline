@@ -5,12 +5,22 @@ from builtins import bool
 import click
 import yaml
 import json
+from random import shuffle
 import runarepo
 from typing import List, Union
 import kachery_client as kc
 from Job import Job
 from multiprocessing import Pool
 from functools import partial
+
+subpaths = {
+    'mountainsort4': 'mountainsort4',
+    'spykingcircus': 'spykingcircus',
+    'tridesclous': 'tridesclous',
+    'kilosort3': 'kilosort3',
+    'kilosort2_5': 'kilosort2_5',
+    'kilosort2': 'kilosort2',
+}
 
 def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dict, use_docker: bool=False, use_singularity: bool=False, image: Union[str, None]=None) -> dict:
     with kc.TemporaryDirectory() as tmpdir:
@@ -20,20 +30,8 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
         output_dir = f'{tmpdir}/output'
 
         repo = os.environ.get('SPIKESORTING_RUNAREPO_PATH', 'https://github.com/scratchrealm/spikesorting-runarepo')
-        if algorithm == 'mountainsort4':
-            subpath = 'mountainsort4'
-        elif algorithm == 'spykingcircus':
-            subpath = 'spykingcircus'
-        elif algorithm == 'tridesclous':
-            subpath = 'tridesclous'
-        elif algorithm == 'kilosort3':
-            subpath = 'kilosort3'
-        elif algorithm == 'kilosort2_5':
-            subpath = 'kilosort2_5'
-        elif algorithm == 'kilosort2':
-            subpath = 'kilosort2'
-        else:
-            raise Exception(f'Unexpected algorithm: {algorithm}')
+        subpath = subpaths.get(algorithm)
+        assert subpath is not None, f'Unsupported algorithm: {algorithm}'
 
         print('Writing sorting params...')
         with open(sorting_params_path, 'w') as f:
@@ -61,23 +59,41 @@ def _run_sorting_job(algorithm: str, recording_nwb_uri: str, sorting_params: dic
             'sorting_npz_uri': sorting_npz_uri
         }
 
-def _run_sorting_jobs_wrapper(job: Job, **kwargs):
+def _run_sorting_jobs_wrapper(job: Job, config_name: str, verbose: bool, dry_run: bool, **kwargs):
+    job_key = _get_job_key(job.label, config_name)
+    got_mutex = kc.set(job_key, os.getpid(), update=False)
+    if not got_mutex:
+        # unable to acquire mutex: someone else must have claimed this job, so we can skip it
+        if (verbose): print(f"\tUnable to get lock {job_key}, skipping.")
+        return
+    if (verbose): print(f"\tGot lock for job {job_key}")
+    # try:
     print(f'Running: {job.label}')
-    output = _run_sorting_job(**job.kwargs, **kwargs)
+    if (not dry_run):
+        output = _run_sorting_job(**job.kwargs, **kwargs)
+        kc.set(job.key(), output)
+    else:
+        output = "DRY RUN: JOB SKIPPED"
     print(f'OUTPUT of {job.label}:\n{output}')
-    kc.set(job.key(), output)
+    # Actually we don't want to do this--it can result in re-running jobs.
+    # finally:
+    #     kc.delete(job_key) # Release the mutex (needs to happen even if something failed)
+    #     if (verbose): print(f"\tReleasing lock {job_key}")
+    #     # NOTE POSSIBILITY FOR INFINITE LOOP if running with rerun-failing
 
+def _get_job_key(label: str, config_name: str):
+    return f"{config_name}-running-sorting-{label}"
 
-@click.command()
-@click.argument('config_file')
-@click.argument('algorithm')
-@click.option('--num-parallel', help="Maximum number of sorting jobs to run simultaneously")
-@click.option('--force-run', is_flag=True, help="Force rerurn")
-@click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
-@click.option('--docker', is_flag=True, help="Use docker image")
-@click.option('--singularity', is_flag=True, help="Use singularity image")
-@click.option('--image', default=None, help='Image for use in docker or singularity mode')
-def main(config_file: str, algorithm: str, num_parallel: Union[int, None], force_run: bool, rerun_failing: bool, docker: bool, singularity: bool, image: Union[str, None]):
+def _reset_locks(jobs: List[Job], config_name: str):
+    locks_reset = 0
+    for job in jobs:
+        job_key = _get_job_key(job.label, config_name)
+        if (kc.get(job_key) is not None):
+            locks_reset += 1
+        kc.delete(job_key)
+    return locks_reset
+
+def _init_config(config_file: str, docker: bool, singularity: bool, num_parallel: Union[str, None]=None):
     if docker and singularity:
         raise Exception('Both singularity and docker were requested, but no more than one can be used simultaneously.')
     if num_parallel is None:
@@ -87,25 +103,78 @@ def main(config_file: str, algorithm: str, num_parallel: Union[int, None], force
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
     config_name = config['name']
-    jobs0 = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
-    jobs: List[Job] = [Job.from_dict(job0) for job0 in jobs0]
+    return (config_name, docker, singularity, num_parallel)
+
+def _get_jobs_list(config_name: str, algorithm: str):
+    jobs_dict = kc.get({'type': 'spikeforest-workflow-jobs', 'name': config_name})
+    jobs: List[Job] = [Job.from_dict(job_dict) for job_dict in jobs_dict]
     #### TODO: Should this 'algorithm' actually be 'name'?
     jobs = [job for job in jobs if job.type == 'sorting' and job.kwargs['algorithm'] == algorithm]
-    jobs_to_run: List[Job] = []
-    for job in jobs:
-        a = kc.get(job.key())
-        if force_run or job.force_run or (a is None) or (a['sorting_npz_uri'] is None and rerun_failing):
-            jobs_to_run.append(job)
+    return jobs
+
+def _filter_jobs_to_run(all_jobs: List[Job], force_run: bool, rerun_failing: bool):
+    if force_run:
+        return all_jobs
+
+    jobs: List[Job] = []
+    for job in all_jobs:
+        key = kc.get(job.key())
+        if job.force_run or (key is None) or (key['sorting_npz_uri'] is None and rerun_failing):
+            jobs.append(job)
+    return jobs
+
+def _describe_jobs_to_run(jobs: List[Job], num_parallel: int):
     print('JOBS TO RUN:')
-    for job in jobs_to_run:
+    for job in jobs:
         print(job.label)
     print('')
     print(f'Total number of jobs: {len(jobs)}')
-    print(f'Number of jobs to run: {len(jobs_to_run)}')
+    print(f'Number of jobs to run: {len(jobs)}')
     print(f'Number of jobs run simultaneously: {num_parallel}')
 
+
+@click.command()
+@click.argument('config_file')
+@click.argument('algorithm')
+@click.option('--reset-locks', is_flag=True, help="Clear out all locks on sorting jobs for this algorithm")
+@click.option('--num-parallel', help="Maximum number of sorting jobs to run simultaneously")
+@click.option('--force-run', is_flag=True, help="Force rerurn")
+@click.option('--rerun-failing', is_flag=True, help="Rerun the failing jobs")
+@click.option('--docker', is_flag=True, help="Use docker image")
+@click.option('--singularity', is_flag=True, help="Use singularity image")
+@click.option('--image', default=None, help='Image for use in docker or singularity mode')
+@click.option('--use-deterministic-job-order', is_flag=True, help="If unset, will skip shuffling the order of jobs")
+@click.option('--dry-run', is_flag=True, help="If set, sorters won't actually be called.")
+@click.option('--verbose', is_flag=True, help="Detailed output about steps taken")
+def main(
+    config_file: str,
+    algorithm: str,
+    reset_locks: bool,
+    num_parallel: Union[int, None],
+    force_run: bool,
+    rerun_failing: bool,
+    docker: bool,
+    singularity: bool,
+    image: Union[str, None],
+    use_deterministic_job_order: bool,
+    dry_run: bool,
+    verbose: bool
+):
+    (config_name, docker, singularity, num_parallel) = _init_config(config_file, docker, singularity, num_parallel)
+    all_matched_jobs = _get_jobs_list(config_name, algorithm)
+    if (reset_locks):
+        if verbose: print(f"Resetting locks for {config_file} algorithnm {algorithm}")
+        locks_reset = _reset_locks(all_matched_jobs, config_name)
+        if verbose: print(f"{locks_reset} locks reset.")
+        return
+
+    jobs_to_run = _filter_jobs_to_run(all_matched_jobs, force_run, rerun_failing)
+    if(len(jobs_to_run) > 0 and not use_deterministic_job_order):
+        shuffle(jobs_to_run)
+    _describe_jobs_to_run(jobs_to_run, num_parallel)
+
     # Curry the command line parameters so we can just pass the Job object later on.
-    run_sorting_job_partial = partial(_run_sorting_jobs_wrapper, use_docker=docker, use_singularity=singularity, image=image)
+    run_sorting_job_partial = partial(_run_sorting_jobs_wrapper, use_docker=docker, use_singularity=singularity, image=image, config_name=config_name, dry_run=dry_run, verbose=verbose)
 
     if (num_parallel == 1):
         for job in jobs_to_run:
